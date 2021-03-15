@@ -6,9 +6,9 @@ RUN apt-get update && \
     apt-get -qq -y install curl && \
     apt-get install -y tar
 
-RUN FILEID=1wLcmouRAskQiRC99mdMxj6pii7EEvb9i \
-RUN file=every_gpt.pt \
-RUN curl -c /tmp/cookies "https://drive.google.com/uc?export=download&id=$FILEID" > /tmp/intermezzo.html \
+RUN FILEID=1wLcmouRAskQiRC99mdMxj6pii7EEvb9i
+RUN file=every_gpt.pt
+RUN curl -c /tmp/cookies "https://drive.google.com/uc?export=download&id=$FILEID" > /tmp/intermezzo.html
 RUN curl -L -b /tmp/cookies "https://drive.google.com$(cat /tmp/intermezzo.html | grep -Po 'uc-download-link" [^>]* href="\K[^"]*' | sed 's/\&amp;/\&/g')" > $file
 
 RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 \
