@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>GPT-2 FairyTales</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<script type="text/javascript">
+    let time_obj = undefined;
+    let flag = undefined;
+    let chars = undefined;
+
+    window.onload = () => {
+        time_obj = document.getElementById("timer");
+        flag = false;       // 더블 클릭 체크
+    }
+
+
+    function double_submit_check() {
+        if (flag) {
+            console.log("double");
+            return true;
+        }
+        else {
+            flag = true;
+
+            return false;
+        }
+    }
+
+
+    function send_req() {
+        if (double_submit_check()){
+            return ;
+        }
+
+        let text = document.getElementById("text").value;
+
+        if (text == '') {
+            document.getElementById('warning').innerText = 'Please fill text!';
+            flag = false;
+            return ;
+        }
+
+        const formData = new FormData();
+        const url = "/fairytale";
+        let start = 0;
+
+        formData.append('text', text);
+        formData.append('length', 300);
+
+        // timer
+        timer = setInterval(() => {
+            start += 1;
+            time_obj.innerText = `${start / 10} 's`;
+        }, 100);
+
+
+        fetch (url, { method: 'POST', body: formData, })
+        .then(response => {
+            if (response.status === 200) {
+                return response.json();
+            } else {
+                clearInterval(timer);
+                flag = false;
+            }
+        }).catch(err => {
+            clearInterval(timer);
+            flag = false;
+            document.getElementById('warning').innerText = err;
+        }).then(data => {
+            const result = document.getElementById('result');
+            result.innerHTML = '&nbsp;&nbsp;' + data[0];
+
+            clearInterval(timer);
+            time_obj.innerText = 'Done!';
+            flag = false;
+        }).catch(err => {
+            clearInterval(timer);
+            flag = false;
+            document.getElementById('warning').innerText = err;
+        });
+
+    }
+
+</script>
+<body>
+    <div class="styles">
+        <style>
+                #button{
+                    border-top-left-radius: 5pt;
+                    border-top-right-radius: 5pt;
+                    border-bottom-left-radius: 5pt;
+                    border-bottom-right-radius: 5pt;
+                }
+
+                #length{
+                    width: 70px;
+                    height: 30px;
+                    border-top-left-radius: 5pt;
+                    border-top-right-radius: 5pt;
+                    border-bottom-left-radius: 5pt;
+                    border-bottom-right-radius: 5pt;
+                }
+
+                table {
+                  border-spacing: 10px;
+                  border-collapse: separate;
+                }
+
+        </style>
+    </div>
+    <div class="container">
+        <div class="jumbotron mt-3">
+            <div class="intro">
+                <br>
+                <!-- Project title -->
+                <h1>GPT-2 FairyTales</h1><br>
+                <a>Generate FairyTales using GPT-2 model.</a><br><br>
+                <a>Git hub repository : </a> <a href="https://github.com/fpem123/GPT2-FairyTales" target="_blank">GPT-2 FairyTales</a><br>
+                <a>Open API : </a> <a href="https://ainize.ai/fpem123/GPT2-FairyTales?branch=master" target="_blank">On Ainize</a><br>
+                <a>Fine tuning data : </a><a href="https://www.kaggle.com/cuddlefish/fairy-tales" target="_blank">Kaggle</a><br><br>
+            </div>
+
+            <hr width="90%">
+
+            <div class="Notice">
+                <h3>Notice</h3>
+                <ul>
+                    <li>In this demo, the text length is fixed at 300.</li>
+                    <li>The last line can be cut off in the middle.</li>
+                </ul>
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="sample">
+                <h3><label>Example</label></h3>
+                <h5><label>Input</label></h5>
+                <label>&nbsp;&nbsp;Text: once upon a time,</label><br><br>
+                <h5><label>FairyTales</label></h5>
+                <label>&nbsp;&nbsp;once upon a time, I was enchanted by a wicked fairy, and condemned to keep the shape of a ball till I should meet with two maidens,
+                    who would take me to their own home. But where was I to meet them? For hundreds of years I have lived in the depths of the forest,
+                    where nothing but wild beasts ever came, and it was only when the lion threw me into the sky that I was able to fall to earth near this river.
+                    Where there is a river, sooner or later people will come. so, hanging myself on a tree, I watched and waited.
+                    For a moment I lost heart when I fell into the water, for I do not know what could have become of me.
+                    but somehow I found myself back again, and these two maidens with whom I now live are the cause of my happiness.'
+                    'And you what have you done to the other?' asked the eyes of the emperor. 'I have scattered her ashes all over the face of the earth,
+                    ' replied he. 'but as for your own death I only want your head to be filled with gold.' 'You have done nothing wrong,' said the emperor.
+                    'but gold will never do you good by me, for I have need of it far more than you have.' 'You have only given me power to eat and drink,
+                    and to sleep, and to move my heart,' replied the young man. 'but tell me, why are you mad, and how I am to get water?' 'To bring</label><br><br>
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="generate">
+                <h3>Try it!</h3><br>
+                <label>Base text: </label>
+                <input type="text" id="text" style="width:40%">
+                <button class="btn btn-primary btn=lg" type="submit" id="button1" onclick="send_req();">Summit</button><br>
+                <label>Timer:&nbsp;</label><label id="timer">0.0</label><br>
+                <b><label id="warning" style="color:red;"></label></b>
+            </div>
+
+            <br><hr width="90%">
+
+            <div class="result">
+                <h3><label>Result</label></h3>
+                <!-- Story generate result table -->
+                <label id="result"></label>
+            </div>
+
+            <br><hr width="50%">
+        </div>
+    </div>
+</body>
+</html>

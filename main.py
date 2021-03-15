@@ -127,7 +127,7 @@ def mk_everytime(ids, length):
 
 ##
 # Get post request page.
-@app.route('/mlp', methods=['POST'])
+@app.route('/fairytale', methods=['POST'])
 def generate():
     # GPU app can process only one request in one time.
     if requests_queue.qsize() > BATCH_SIZE:
