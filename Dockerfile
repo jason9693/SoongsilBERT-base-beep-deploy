@@ -9,7 +9,7 @@ RUN apt-get update && \
 RUN FILEID="1wLcmouRAskQiRC99mdMxj6pii7EEvb9i" \
     FILE="every_gpt.pt" \
     curl -c /tmp/cookies "https://drive.google.com/uc?export=download&id=$FILEID" > /tmp/intermezzo.html \
-    curl -L -b /tmp/cookies "https://drive.google.com$(cat /tmp/intermezzo.html | grep -Po 'uc-download-link" [^>]* href="\K[^"]*' | sed 's/\&amp;/\&/g')" > $FILE
+    curl -L -b /tmp/cookies "https://drive.google.com$(cat /tmp/intermezzo.html | grep -Po 'uc-download-link" [^>]* href="\K[^"]*' | sed 's/\&amp;/\&/g')" > "$FILE"
 
 RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 \
     FILE=kogpt2_news_wiki_ko_cased_818bfa919d.spiece \
