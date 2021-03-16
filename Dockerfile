@@ -28,4 +28,4 @@ RUN pip install transformers \
 
 EXPOSE 80
 
-CMD ["python3", "main.py"]
+CMD ["python", "main.py"]
