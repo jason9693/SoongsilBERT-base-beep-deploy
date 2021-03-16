@@ -7,8 +7,8 @@ from queue import Queue, Empty
 from threading import Thread
 import time
 
-model_file = "every_gpt.pt"
-tok_path = "kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
+model_file = "./every_gpt.pt"
+tok_path = "./kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
 kogpt2_config = {
     "initializer_range": 0.02,
     "layer_norm_epsilon": 1e-05,
