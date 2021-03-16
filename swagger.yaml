@@ -1,0 +1,73 @@
+openapi: 3.0.0   # Open api version
+
+info:
+  title: GPT-2 everytime
+  version: "v0.1"
+  contact:
+    name: AInizer - Lee hoseop
+  description: |
+    This app is generate everytime community style korean text using GPT-2 model.
+    ---
+      How to use:
+      * First, Fill what the character will say in text. This will be base of script.
+      * Second, Choose text style category.
+      * And then, Fill number in length. Text is created as long as "length". I recommend between 100 and 300.
+      * If length is so big, generate time will be long.
+    ---
+    And you can use this in [demo page](https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/).
+
+    Origin colab >> [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh)
+
+servers:
+  - url: https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/
+
+paths:
+  /friends:
+    post:
+      requestBody:
+        required: true
+        description: |
+          This request will generate everytime community style korean text using GPT-2 model.
+
+          Request body example
+
+              text: 님들 오늘 수업
+              category: 대학생 잡담방
+              length: 200
+
+          curl example
+
+
+
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: "The base of script."
+                category:
+                  type: string
+                  enum: [대학생 잡담방, 숭실대 에타, 모두의 연애]
+                  description: "The text style category."
+                length:
+                  type: string
+                  description: "The size of text."
+              required:
+                - category
+                - text
+                - length
+      responses:   # Set response
+        '200':
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: "Bad Request Error"
+        '429':
+          description: "Too many requests"
+        '500':
+          description: "Server-side Error"
