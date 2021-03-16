@@ -41,6 +41,7 @@
 
         let text = document.getElementById("text").value;
         let category = document.getElementById("category").value;
+        let length = document.getElementById("length").value;
 
         if (text == '') {
             document.getElementById('warning').innerText = 'Please fill text!';
@@ -54,7 +55,7 @@
 
         formData.append('text', text);
         formData.append('category', category);
-        formData.append('length', 300);
+        formData.append('length', length);
 
         // timer
         timer = setInterval(() => {
@@ -101,9 +102,16 @@
                     border-bottom-right-radius: 5pt;
                 }
 
-                #length{
+                #length, #category{
                     width: 70px;
                     height: 30px;
+                    border-top-left-radius: 5pt;
+                    border-top-right-radius: 5pt;
+                    border-bottom-left-radius: 5pt;
+                    border-bottom-right-radius: 5pt;
+                }
+
+                #text {
                     border-top-left-radius: 5pt;
                     border-top-right-radius: 5pt;
                     border-bottom-left-radius: 5pt;
@@ -154,12 +162,18 @@
             <div class="generate">
                 <h3>Try it!</h3><br>
                 <label>Base text: </label>
-                <input type="text" id="text" style="width:40%">
+                <input type="text" id="text" style="width:40%"><br>
                 <label>Category: </label>
                 <select id="category" style="width:110pt">
                     <option value="모두의 연애">모두의 연애</option>
                     <option value="숭실대 에타">숭실대 에타</option>
                     <option value="대학생 잡담방">대학생 잡담방</option>
+                </select>&nbsp;&nbsp;
+                <label>Length: </label>
+                <select id="length" style="width:110pt">
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="300">300</option>
                 </select><br>
                 <button class="btn btn-primary btn=lg" type="submit" id="button1" onclick="send_req();">Summit</button><br>
                 <label>Timer:&nbsp;</label><label id="timer">0.0</label><br>
