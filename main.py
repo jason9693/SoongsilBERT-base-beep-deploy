@@ -77,6 +77,7 @@ def mk_everytime(text, category, length):
         ids = [category_id] + ids
 
         input_ids = torch.tensor(ids).unsqueeze(0)
+        input_ids = input_ids.to(device)
 
         min_length = len(input_ids.tolist()[0])
 
