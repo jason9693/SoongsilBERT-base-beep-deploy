@@ -2,13 +2,13 @@ import sentencepiece
 from transformers import GPT2Config, GPT2LMHeadModel
 from flask import Flask, request, jsonify, render_template
 import torch
-
+import os
 from queue import Queue, Empty
 from threading import Thread
 import time
 
-model_file = "./every_gpt.pt"
-tok_path = "./kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
+model_file = "every_gpt.pt"
+tok_path = "kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
 kogpt2_config = {
     "initializer_range": 0.02,
     "layer_norm_epsilon": 1e-05,
@@ -25,7 +25,7 @@ category_map = {
     "숭실대 에타": "<unused5>",
     "대학생 잡담방": "<unused4>"
 }
-
+os.system('ls')
 app = Flask(__name__)
 
 # Model & Tokenizer loading
