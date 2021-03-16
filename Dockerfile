@@ -7,9 +7,9 @@ RUN apt-get update && \
     apt-get -qq -y install curl && \
     apt-get install -y tar
 
-RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 \
-    file=kogpt2_news_wiki_ko_cased_818bfa919d.spiece \
-    URL="https://drive.google.com/uc?export=download&id=$id" \
+RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 && \
+    file=kogpt2_news_wiki_ko_cased_818bfa919d.spiece && \
+    URL="https://drive.google.com/uc?export=download&id=$id" && \
     wget --no-check-certificate "https://docs.google.com/uc?export=download&id=$FILEID" -O $file
 
 RUN ls -l
