@@ -7,6 +7,16 @@ RUN apt-get update && \
     apt-get -qq -y install curl && \
     apt-get install -y tar
 
+
+RUN pip install --upgrade pip
+RUN pip install transformers==2.11.0 \
+    flask \
+    waitress \
+    sentencepiece
+
+WORKDIR /app
+COPY . .
+
 RUN FILEID=1wLcmouRAskQiRC99mdMxj6pii7EEvb9i && \
     file=every_gpt.pt && \
     curl -c /tmp/cookies "https://drive.google.com/uc?export=download&id=$FILEID" > /tmp/intermezzo.html && \
@@ -19,15 +29,6 @@ RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 && \
     wget --no-check-certificate "https://docs.google.com/uc?export=download&id=$FILEID" -O $file
 
 RUN ls -l
-
-RUN pip install --upgrade pip
-RUN pip install transformers==2.11.0 \
-    flask \
-    waitress \
-    sentencepiece
-
-WORKDIR /app
-COPY . .
 
 EXPOSE 80
 
