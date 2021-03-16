@@ -1,6 +1,6 @@
 # GPT2 everytime
 
-[![Run on Ainize](https://ainize.ai/images/run_on_ainize_button.svg)](https://ainize.web.app/redirect?git_repo=https://github.com/fpem123/GPT2-FairyTales)
+[![Run on Ainize](https://ainize.ai/images/run_on_ainize_button.svg)](https://ainize.web.app/redirect?git_repo=https://github.com/fpem123/gpt2-everytime)
 
 This project generate everytime community style korean text using GPT-2 model.
 
