@@ -21,7 +21,7 @@ RUN FILEID=19t6_Cn6qPM7HEq23zbeMQdeKtqGcEz73 && \
 RUN ls -l
 
 RUN pip install --upgrade pip
-RUN pip install transformers \
+RUN pip install transformers==2.11.0 \
     flask \
     waitress \
     sentencepiece

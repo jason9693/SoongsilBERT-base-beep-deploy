@@ -2,9 +2,7 @@ import sentencepiece
 from transformers import GPT2Config, GPT2LMHeadModel
 from flask import Flask, request, jsonify, render_template
 import torch
-from torch.nn import functional as F
 
-from collections import OrderedDict
 from queue import Queue, Empty
 from threading import Thread
 import time
