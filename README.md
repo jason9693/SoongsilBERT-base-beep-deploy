@@ -29,13 +29,15 @@ Origin notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNP
 
 ### Input example
 
-
-    
+    curl -X POST "https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/everytime" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=님들 오늘 수업" -F "category=대학생 잡담방" -F "length=100"
 
 ### Output example
 
 
     {
+      "0": "<unused4> 님들 오늘 수업끝나고 수업시간에 뭐하나요? ᄉᄇ<unused2>어제 전공공부 다  ⁇ 끝나서 늦게까지 남아서 하고 나왔는데<unused2>아  ⁇
+            끝나갈시간이네 다들 과제끝났다  ⁇  얘두라 저번에 술취한 애한테 카톡보냈는데 답장이 없네? 나랑 대화 가능? 이거 뭐냐 이 미친새끼...  ⁇  
+            와 진짜 자살생각하구 이 시간에 전화해서 내가 전화"
     }
 
 

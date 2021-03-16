@@ -22,7 +22,7 @@ servers:
   - url: https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/
 
 paths:
-  /friends:
+  /everytime:
     post:
       requestBody:
         required: true
@@ -37,7 +37,7 @@ paths:
 
           curl example
 
-
+              curl -X POST "https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/everytime" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=님들 오늘 수업" -F "category=대학생 잡담방" -F "length=200"
 
         content:
           multipart/form-data:
