@@ -1,6 +1,6 @@
 import sentencepiece
 from transformers import GPT2Config, GPT2LMHeadModel
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template
 import torch
 import os
 from queue import Queue, Empty
@@ -97,11 +97,11 @@ def mk_everytime(text, category, length):
         for idx, sample_output in enumerate(outputs):
             result[0] = tokenizer.decode(sample_output.tolist())
 
-        return result
+        return result, 200
 
     except Exception as e:
         print('Error occur in script generating!', e)
-        return jsonify({'error': e}), 500
+        return {'error': e}, 500
 
 
 ##
@@ -110,7 +110,7 @@ def mk_everytime(text, category, length):
 def generate():
     # GPU app can process only one request in one time.
     if requests_queue.qsize() > BATCH_SIZE:
-        return jsonify({'Error': 'Too Many Requests'}), 429
+        return {'Error': 'Too Many Requests'}, 429
 
     try:
         args = []
@@ -124,7 +124,7 @@ def generate():
         args.append(length)
 
     except Exception as e:
-        return jsonify({'message': 'Invalid request'}), 500
+        return {'message': 'Invalid request'}, 500
 
     # input a request on queue
     req = {'input': args}
@@ -134,7 +134,7 @@ def generate():
     while 'output' not in req:
         time.sleep(CHECK_INTERVAL)
 
-    return jsonify(req['output'])
+    return req['output']
 
 
 ##
