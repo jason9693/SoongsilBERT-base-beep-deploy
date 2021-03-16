@@ -4,10 +4,10 @@ from flask import Flask, request, jsonify, render_template
 import torch
 from torch.nn import functional as F
 
+from collections import OrderedDict
 from queue import Queue, Empty
 from threading import Thread
 import time
-
 
 model_file = "every_gpt.pt"
 tok_path = "kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
@@ -21,6 +21,11 @@ kogpt2_config = {
     "n_positions": 1024,
     "vocab_size": 50000,
     "activation_function": "gelu"
+}
+category_map = {
+    "모두의 연애": "<unused3>",
+    "숭실대 에타": "<unused5>",
+    "대학생 잡담방": "<unused4>"
 }
 
 app = Flask(__name__)
@@ -56,7 +61,7 @@ def handle_requests_by_batch():
 
             for requests in request_batch:
                 try:
-                    requests["output"] = mk_everytime(requests['input'][0], requests['input'][1])
+                    requests["output"] = mk_everytime(requests['input'][0], requests['input'][1], requests['input'][2])
                 except Exception as e:
                     requests["output"] = e
 
@@ -64,59 +69,35 @@ def handle_requests_by_batch():
 handler = Thread(target=handle_requests_by_batch).start()
 
 
-def top_k_logits(logits, k):
-    if k == 0:
-        return logits
-    values, _ = torch.topk(logits, k)
-    min_values = values[:, -1]
-    return torch.where(logits < min_values, torch.ones_like(logits, dtype=logits.dtype) * -1e10, logits)
-
-
-def top_p_logits(logits, top_p=0.0, filter_value=-float('Inf')):
-    """Nucleus sampling"""
-    if top_p > 0.0:
-        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-        cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-
-        # Remove tokens with cumulative probability above the threshold
-        sorted_indices_to_remove = cumulative_probs >= top_p
-        # Shift the indices to the right to keep also the first token above the threshold
-        sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-        sorted_indices_to_remove[..., 0] = 0
-
-        indices_to_remove = sorted_indices[sorted_indices_to_remove]
-        logits[:, indices_to_remove] = filter_value
-    return logits
-
-
 ##
 # GPT-2 generator.
-def mk_everytime(ids, length):
+def mk_everytime(text, category, length):
     try:
-        duplicate_count = 0
-        duplicate_threshold = 10
+        ids = tokenizer.encode_as_ids(text)
 
-        for i in range(0, length):
-            input_ids = torch.tensor(ids).unsqueeze(0)
-            pred = model(input_ids)[0]
-            logits = pred[:, -1, :]
-            # logits = top_p_logits(logits, 0.8)
-            logits = top_k_logits(logits, 10)
-            log_probs = F.softmax(logits, dim=-1)
-            prev = torch.multinomial(log_probs, num_samples=1)
-            gen = prev[0].tolist()
+        category_id = tokenizer.piece_to_id(category_map[category])
+        ids = [category_id] + ids
 
-            if gen[0] == tokenizer.eos_id():
-                break
+        input_ids = torch.tensor(ids).unsqueeze(0)
 
-            duplicate_count = duplicate_count + 1 if ids[-1] == gen[0] else 0
+        min_length = len(input_ids.tolist()[0])
 
-            if duplicate_count > duplicate_threshold:
-                break
+        length = length if length > 0 else 1
 
-            ids += gen
+        length += min_length
 
-        result = tokenizer.decode_ids(ids)
+        # story model generating
+        outputs = model.generate(input_ids, pad_token_id=50256,
+                                 do_sample=True,
+                                 max_length=length,
+                                 min_length=min_length,
+                                 top_k=40,
+                                 num_return_sequences=1)
+
+        result = dict()
+
+        for idx, sample_output in enumerate(outputs):
+            result[0] = tokenizer.decode(sample_output.tolist())
 
         return result
 
@@ -127,7 +108,7 @@ def mk_everytime(ids, length):
 
 ##
 # Get post request page.
-@app.route('/fairytale', methods=['POST'])
+@app.route('/everytime', methods=['POST'])
 def generate():
     # GPU app can process only one request in one time.
     if requests_queue.qsize() > BATCH_SIZE:
@@ -137,9 +118,11 @@ def generate():
         args = []
 
         text = request.form['text']
+        category = request.form['category']
         length = int(request.form['length'])
 
         args.append(text)
+        args.append(category)
         args.append(length)
 
     except Exception as e:
