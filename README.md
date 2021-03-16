@@ -22,7 +22,7 @@ Origin notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNP
 
 ### Output format
 
-    {"0": generated text(utf-8)}
+    {"0": generated text(utf-8, korean)}
 
 
 ## * With CLI *
