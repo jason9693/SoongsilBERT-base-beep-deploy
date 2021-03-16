@@ -26,6 +26,9 @@ RUN pip install transformers \
     waitress \
     sentencepiece
 
+WORKDIR /app
+COPY . .
+
 EXPOSE 80
 
 CMD ["python", "main.py"]
