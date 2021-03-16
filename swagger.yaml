@@ -46,7 +46,7 @@ paths:
               properties:
                 text:
                   type: string
-                  description: "The base of script."
+                  description: "The base of generated text."
                 category:
                   type: string
                   enum: [대학생 잡담방, 숭실대 에타, 모두의 연애]
