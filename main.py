@@ -88,6 +88,7 @@ def mk_natural_everytime(ids):
 
     for i in range(0, 512):
         input_ids = torch.tensor(ids).unsqueeze(0)
+        input_ids = input_ids.to(device)
         pred = model(input_ids)[0]
         logits = pred[:, -1, :]
         # logits = top_p_logits(logits, 0.8)
@@ -112,7 +113,7 @@ def mk_natural_everytime(ids):
 def mk_everytime(text, category, length):
     try:
         length = length if length > -1 else 0
-        result = dict()
+
         ids = tokenizer.encode_as_ids(text)
         category_id = tokenizer.piece_to_id(category_map[category])
         ids = [category_id] + ids
