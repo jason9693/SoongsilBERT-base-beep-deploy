@@ -15,6 +15,7 @@ Original notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJ
     * And then, Fill number in length. Text is created as long as "length". I recommend between 100 and 300.
     * If length is so big, generate time will be long.
     * Finally, select the desired type and send the request. ['natural', 'fix-length']
+    * 'natural' stops generating when a newline occurs, generating a natural sentence. With 'fix-length', sentences as long as the length are generated.
 
 ### Post parameter
 
