@@ -111,22 +111,22 @@ def mk_natural_everytime(ids):
 # GPT-2 generator.
 def mk_everytime(text, category, length):
     try:
+        length = length if length > -1 else 0
+        result = dict()
         ids = tokenizer.encode_as_ids(text)
         category_id = tokenizer.piece_to_id(category_map[category])
         ids = [category_id] + ids
 
-        input_ids = torch.tensor(ids).unsqueeze(0)
-        input_ids = input_ids.to(device)
-
-        min_length = len(input_ids.tolist()[0])
-
-        length = length if length > -1 else 0
-
         result = dict()
 
         if length == 0:
-            result[0] = mk_natural_everytime(input_ids)
+            result[0] = mk_natural_everytime(ids)
         else:
+            input_ids = torch.tensor(ids).unsqueeze(0)
+            input_ids = input_ids.to(device)
+
+            min_length = len(input_ids.tolist()[0])
+
             length += min_length
 
             # model generating
@@ -138,7 +138,7 @@ def mk_everytime(text, category, length):
                                      num_return_sequences=1)
 
             for idx, sample_output in enumerate(outputs):
-                result[0] = tokenizer.decode(sample_output[1:].tolist())
+                result[0] = tokenizer.decode(sample_output[1:].tolist()).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
 
         return result, 200
 
