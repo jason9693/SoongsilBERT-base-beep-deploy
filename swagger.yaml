@@ -24,7 +24,7 @@ servers:
   - url: https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/
 
 paths:
-  /everytime:
+  /everytime/natural:
     post:
       requestBody:
         required: true
@@ -34,12 +34,12 @@ paths:
           Request body example
 
               text: 님들 오늘 수업
-              category: 대학생 잡담방
+              category: 숭실대 에타
               length: 200
 
           curl example
 
-              curl -X POST "https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/everytime" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=님들 오늘 수업" -F "category=대학생 잡담방" -F "length=200"
+              curl -X POST "https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/everytime/natural" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=님들 오늘 수업" -F "category=숭실대 에타" -F "length=200"
 
         content:
           multipart/form-data:
@@ -55,7 +55,57 @@ paths:
                   description: "The text style category."
                 length:
                   type: string
-                  description: "The size of text. If you enter 0, natural generation is performed."
+                  description: "The max size of generated text."
+              required:
+                - category
+                - text
+                - length
+      responses:   # Set response
+        '200':
+          description: "Successful Response"
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: "Bad Request Error"
+        '429':
+          description: "Too many requests"
+        '500':
+          description: "Server-side Error"
+
+  /everytime/fix-length:
+    post:
+      requestBody:
+        required: true
+        description: |
+          This request will generate everytime community style korean text using GPT-2 model.
+
+          Request body example
+
+              text: 님들 오늘 수업
+              category: 대학생 잡담방
+              length: 200
+
+          curl example
+
+              curl -X POST "https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/everytime/fix-length:" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=님들 오늘 수업" -F "category=대학생 잡담방" -F "length=200"
+
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: "The base of generated text."
+                category:
+                  type: string
+                  enum: [대학생 잡담방, 숭실대 에타, 모두의 연애]
+                  description: "The text style category."
+                length:
+                  type: string
+                  description: "The size of generated ext."
               required:
                 - category
                 - text
