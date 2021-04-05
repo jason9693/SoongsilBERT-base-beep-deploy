@@ -42,12 +42,19 @@
         let text = document.getElementById("text").value;
         let category = document.getElementById("category").value;
         let length = document.getElementById("length").value;
-        let types = document.getElementByName("types").value;
+        let types_radio = document.getElementsByName("types");
+        let types = 'natural';
 
         if (text == '') {
             document.getElementById('warning').innerText = 'Please fill text!';
             flag = false;
             return ;
+        }
+
+        for (var i=0; i<types_radio.length; i++) {
+            if (types_radio[i].checked == true) {
+                types = types_radio[i].value;
+            }
         }
 
         const formData = new FormData();
