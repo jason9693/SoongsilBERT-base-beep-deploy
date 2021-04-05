@@ -19,7 +19,7 @@ Original notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJ
 
     text: The base of generated text.
     category: The text style category. [숭실대 에타, 대학생 잡담방, 모두의 연애]
-    length: The size of generated text.
+    length: The size of generated text. If you enter 0, natural generation is performed.
 
 
 ### Output format

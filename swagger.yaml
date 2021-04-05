@@ -55,7 +55,7 @@ paths:
                   description: "The text style category."
                 length:
                   type: string
-                  description: "The size of text."
+                  description: "The size of text. If you enter 0, natural generation is performed."
               required:
                 - category
                 - text
