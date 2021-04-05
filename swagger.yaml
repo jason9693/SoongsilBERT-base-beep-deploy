@@ -16,9 +16,9 @@ info:
     ---
     And you can use this in [demo page](https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/).
 
-    Origin github >> [jason9693/UCK-GPT2](https://github.com/jason9693/UCK-GPT2)
+    Original github >> [jason9693/UCK-GPT2](https://github.com/jason9693/UCK-GPT2)
 
-    Origin colab >> [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh)
+    Original colab >> [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh)
 
 servers:
   - url: https://master-gpt2-everytime-fpem123.endpoint.ainize.ai/

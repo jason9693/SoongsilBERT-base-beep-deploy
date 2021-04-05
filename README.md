@@ -4,9 +4,9 @@
 
 This project generate everytime community style korean text using GPT-2 model.
 
-Origin github: [jason9693/UCK-GPT2](https://github.com/jason9693/UCK-GPT2)
+Original github: [jason9693/UCK-GPT2](https://github.com/jason9693/UCK-GPT2)
 
-Origin notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh)
+Original notebook: [Colab](https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh)
 
 ### How to use
 
