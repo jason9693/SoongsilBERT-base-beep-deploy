@@ -62,7 +62,14 @@ def handle_requests_by_batch():
 
             for requests in request_batch:
                 try:
-                    requests["output"] = mk_everytime(requests['input'][0], requests['input'][1], requests['input'][2])
+                    types = requests['input'].pop(0)
+
+                    if types == 'natural':
+                        requests["output"] = mk_natural_everytime(requests['input'][0], requests['input'][1],
+                                                                  requests['input'][2])
+                    elif types == 'fix-length':
+                        requests["output"] = mk_everytime(requests['input'][0], requests['input'][1],
+                                                          requests['input'][2])
                 except Exception as e:
                     requests["output"] = e
 
@@ -101,37 +108,49 @@ def top_p_logits(logits, top_p=0.0, filter_value=-float('Inf')):
 
 ##
 # GPT-2 natural generator
-def mk_natural_everytime(ids):
-    duplicate_count = 0
-    duplicate_threshold = 10
+def mk_natural_everytime(text, category, length):
+    try:
+        length = length if length > 0 else 512
+        result = dict()
 
-    for i in range(0, 512):
-        input_ids = torch.tensor(ids).unsqueeze(0)
-        input_ids = input_ids.to(device)
-        pred = model(input_ids)[0]
-        logits = pred[:, -1, :]
-        # logits = top_p_logits(logits, 0.8)
-        logits = top_k_logits(logits, 10)
-        log_probs = F.softmax(logits, dim=-1)
-        prev = torch.multinomial(log_probs, num_samples=1)
-        gen = prev[0].tolist()
-        if gen[0] == tokenizer.eos_id():
-            break
-        duplicate_count = duplicate_count + 1 if ids[-1] == gen[0] else 0
-        if duplicate_count > duplicate_threshold:
-            break
-        ids += gen
+        ids = tokenizer.encode_as_ids(text)
+        category_id = tokenizer.piece_to_id(category_map[category])
+        ids = [category_id] + ids
 
-    result = tokenizer.decode_ids(ids[1:]).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
+        duplicate_count = 0
+        duplicate_threshold = 10
 
-    return result
+        for i in range(0, length):
+            input_ids = torch.tensor(ids).unsqueeze(0)
+            input_ids = input_ids.to(device)
+            pred = model(input_ids)[0]
+            logits = pred[:, -1, :]
+            # logits = top_p_logits(logits, 0.8)
+            logits = top_k_logits(logits, 10)
+            log_probs = F.softmax(logits, dim=-1)
+            prev = torch.multinomial(log_probs, num_samples=1)
+            gen = prev[0].tolist()
+            if gen[0] == tokenizer.eos_id():
+                break
+            duplicate_count = duplicate_count + 1 if ids[-1] == gen[0] else 0
+            if duplicate_count > duplicate_threshold:
+                break
+            ids += gen
+
+        result[0] = tokenizer.decode_ids(ids[1:]).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
+
+        return result, 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return {'error': e}, 500
 
 
 ##
 # GPT-2 generator.
 def mk_everytime(text, category, length):
     try:
-        length = length if length > -1 else 0
+        length = length if length > 0 else 100
 
         ids = tokenizer.encode_as_ids(text)
         category_id = tokenizer.piece_to_id(category_map[category])
@@ -139,26 +158,23 @@ def mk_everytime(text, category, length):
 
         result = dict()
 
-        if length == 0:
-            result[0] = mk_natural_everytime(ids)
-        else:
-            input_ids = torch.tensor(ids).unsqueeze(0)
-            input_ids = input_ids.to(device)
+        input_ids = torch.tensor(ids).unsqueeze(0)
+        input_ids = input_ids.to(device)
 
-            min_length = len(input_ids.tolist()[0])
+        min_length = len(input_ids.tolist()[0])
 
-            length += min_length
+        length += min_length
 
-            # model generating
-            outputs = model.generate(input_ids, pad_token_id=50256,
-                                     do_sample=True,
-                                     max_length=length,
-                                     min_length=min_length,
-                                     top_k=40,
-                                     num_return_sequences=1)
+        # model generating
+        outputs = model.generate(input_ids, pad_token_id=50256,
+                                 do_sample=True,
+                                 max_length=length,
+                                 min_length=min_length,
+                                 top_k=40,
+                                 num_return_sequences=1)
 
-            for idx, sample_output in enumerate(outputs):
-                result[0] = tokenizer.decode(sample_output[1:].tolist()).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
+        for idx, sample_output in enumerate(outputs):
+            result[0] = tokenizer.decode(sample_output[1:].tolist()).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
 
         return result, 200
 
@@ -169,8 +185,11 @@ def mk_everytime(text, category, length):
 
 ##
 # Get post request page.
-@app.route('/everytime', methods=['POST'])
-def generate():
+@app.route('/everytime/<types>', methods=['POST'])
+def generate(types):
+    if types not in ['natural', 'fix-length']:
+        return {'Error': 'Invalid types'}, 404
+
     # GPU app can process only one request in one time.
     if requests_queue.qsize() > BATCH_SIZE:
         return {'Error': 'Too Many Requests'}, 429
@@ -182,6 +201,7 @@ def generate():
         category = request.form['category']
         length = int(request.form['length'])
 
+        args.append(types)
         args.append(text)
         args.append(category)
         args.append(length)

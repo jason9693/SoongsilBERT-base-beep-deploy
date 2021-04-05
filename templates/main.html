@@ -42,6 +42,7 @@
         let text = document.getElementById("text").value;
         let category = document.getElementById("category").value;
         let length = document.getElementById("length").value;
+        let types = document.getElementByName("types").value;
 
         if (text == '') {
             document.getElementById('warning').innerText = 'Please fill text!';
@@ -50,7 +51,7 @@
         }
 
         const formData = new FormData();
-        const url = "/everytime";
+        const url = `/everytime/${types}`;
         let start = 0;
 
         formData.append('text', text);
@@ -140,11 +141,19 @@
 
             <hr width="90%">
 
-            <div class="Notice">
+            <div class="Info">
                 <h3>Notice</h3>
                 <ul>
                     <li>Korean 커뮤니티 GPT 모델을 사용해 볼 수 있는 페이지입니다.</li>
                     <li>모델은 숭실대 에타, 대학생 잡담방, 모두의 연애 게시판 3가지 스타일을 제공합니다.</li>
+                </ul>
+
+                <h3>How to use?</h3>
+                <ul>
+                    <li>Text 에 생성의 기초가 될 문장을 입력합니다.</li>
+                    <li>원하는 Category 를 입력합니다.</li>
+                    <li>Length 에서 원하는 길이를 선택합니다.</li>
+                    <li>Types 를 선택합니다. Natural 을 선택하면 자연스러운 한 문장이 생성되고, Fix-Length 을 선택하면 Length 만큼의 글이 생성됩니다. </li>
                 </ul>
             </div>
 
@@ -152,17 +161,27 @@
 
             <div class="sample">
                 <h3><label>Example</label></h3>
+
+                <h5><label>Input</label></h5>
+                <label>&nbsp;&nbsp;Text: 야 오늘 수업</label><br>
+                <label>&nbsp;&nbsp;Category: 대학생 잡담</label><br>
+                <label>&nbsp;&nbsp;Length: 200</label><br>
+                <label>&nbsp;&nbsp;Types: Natural</label><br><br>
+                <h5><label>Output</label></h5>
+                <label>
+                    &nbsp;&nbsp;야 오늘 수업시간에 레포트 쓰라는거 내가 ᄅᄋ ᄅᄋ ᄅᄋ 레포트쓰면 안됨?
+                </label><br><br>
+
                 <h5><label>Input</label></h5>
                 <label>&nbsp;&nbsp;Text: 와 진짜 오늘</label><br>
                 <label>&nbsp;&nbsp;Category: 숭실대 에타</label><br>
-                <label>&nbsp;&nbsp;Length: 200</label><br><br>
-                <h5><label>Everytime</label></h5>
+                <label>&nbsp;&nbsp;Length: 100</label><br>
+                <label>&nbsp;&nbsp;Types: Fix-length</label><br><br>
+                <h5><label>Output</label></h5>
                 <label>
-                    &nbsp;&nbsp;와 진짜 오늘 공강인데 집에 가기 싫다 안 그래도 학교 1시간 30분 걸어다니고 시험때문에 스트레스 ⁇
-                    인데 오늘 학교를 가야하나 싶을 정도로 너무 공강이어서 가기 싫다.. 내일 수업 2개인데 안 갔어도 그래도 학교에 오래있고 싶긴한데 못 가서 안 왔으면 좋을까...
-                    오늘 좀 푹 쉬고 학교가기 싫은데 어쩌지 내일은 꼭 좀 깨웠으면 좋겠다....근데 진짜 내가 너무 피곤한가..그냥 집 가는 게 좋겠는데... 하...
-                    내일 공강인 애들은 왜 못 일어나게 하지.. 학교 갈 수 있으니 괜히 울적한데 휴학생들은 다 바쁘구나 ⁇ 다들 휴학하고 똘똘히 학교 다닙시다 다들 휴학하는 애들 홧팅!!!!!!
-                    아아 낼 개강 실화냐? 휴학중이라 알바도 안 한다 진짜 짜증난다 진짜.. 제발 휴학하고싶은 사람
+                    &nbsp;&nbsp;와 진짜 오늘 날씨 가을인양 덥네 ⁇ 그만 입고다니고 시펑 밖에 사람 거의 없는데 에어컨 빵빵틀고 있으니까 기분좋다 에휴...
+                    오늘 아침 9시까지 밖에 나가있을 ⁇ 데 벌써 집감 오늘 추워서 안들어갔는데 내일은 아침부터 덥네 더워 ⁇
+                    밖에 나갈 일 없어서 집가는 중 에휴 집에 와서 샤워해야지 어제는 덥더니 오늘은 덥네 근데 뭔가
                 </label><br><br>
             </div>
 
@@ -180,11 +199,15 @@
                 </select>&nbsp;&nbsp;
                 <label>Length: </label>
                 <select id="length" style="width:110pt">
-                    <option value="0">Natural</option>
                     <option value="100">100</option>
                     <option value="200">200</option>
                     <option value="300">300</option>
+                    <option value="300">400</option>
                 </select><br>
+                <label> Type:
+                    <input type="radio" name="types" value="natural" checked> Natural
+                    <input type="radio" name="types" value="fix-length"> Fix-Length
+                </label><br>
                 <button class="btn btn-primary btn=lg" type="submit" id="button1" onclick="send_req();">Summit</button><br>
                 <label>Timer:&nbsp;</label><label id="timer">0.0</label><br>
                 <b><label id="warning" style="color:red;"></label></b>
