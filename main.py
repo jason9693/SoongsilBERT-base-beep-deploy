@@ -3,6 +3,7 @@ from transformers import GPT2Config, GPT2LMHeadModel
 from flask import Flask, request, render_template
 import torch
 from torch.nn import functional as F
+import traceback
 
 import os
 from queue import Queue, Empty
@@ -136,14 +137,13 @@ def mk_everytime(text, category, length):
                                      top_k=40,
                                      num_return_sequences=1)
 
-
             for idx, sample_output in enumerate(outputs):
-                result[0] = tokenizer.decode(sample_output.tolist())
+                result[0] = tokenizer.decode(sample_output[1:].tolist())
 
         return result, 200
 
     except Exception as e:
-        print('Error occur in script generating!', e)
+        traceback.print_exc()
         return {'error': e}, 500
 
 
