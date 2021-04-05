@@ -2,6 +2,8 @@ import sentencepiece
 from transformers import GPT2Config, GPT2LMHeadModel
 from flask import Flask, request, render_template
 import torch
+from torch.nn import functional as F
+
 import os
 from queue import Queue, Empty
 from threading import Thread
@@ -68,11 +70,47 @@ handler = Thread(target=handle_requests_by_batch).start()
 
 
 ##
+# top_k_logits
+def top_k_logits(logits, k):
+    if k == 0:
+        return logits
+    values, _ = torch.topk(logits, k)
+    min_values = values[:, -1]
+    return torch.where(logits < min_values, torch.ones_like(logits, dtype=logits.dtype) * -1e10, logits)
+
+
+##
+# GPT-2 natural generator
+def mk_natural_everytime(ids):
+    duplicate_count = 0
+    duplicate_threshold = 10
+
+    for i in range(0, 512):
+        input_ids = torch.tensor(ids).unsqueeze(0)
+        pred = model(input_ids)[0]
+        logits = pred[:, -1, :]
+        # logits = top_p_logits(logits, 0.8)
+        logits = top_k_logits(logits, 10)
+        log_probs = F.softmax(logits, dim=-1)
+        prev = torch.multinomial(log_probs, num_samples=1)
+        gen = prev[0].tolist()
+        if gen[0] == tokenizer.eos_id():
+            break
+        duplicate_count = duplicate_count + 1 if ids[-1] == gen[0] else 0
+        if duplicate_count > duplicate_threshold:
+            break
+        ids += gen
+
+    result = tokenizer.decode_ids(ids[1:]).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
+
+    return result
+
+
+##
 # GPT-2 generator.
 def mk_everytime(text, category, length):
     try:
         ids = tokenizer.encode_as_ids(text)
-
         category_id = tokenizer.piece_to_id(category_map[category])
         ids = [category_id] + ids
 
@@ -81,22 +119,26 @@ def mk_everytime(text, category, length):
 
         min_length = len(input_ids.tolist()[0])
 
-        length = length if length > 0 else 1
-
-        length += min_length
-
-        # story model generating
-        outputs = model.generate(input_ids, pad_token_id=50256,
-                                 do_sample=True,
-                                 max_length=length,
-                                 min_length=min_length,
-                                 top_k=40,
-                                 num_return_sequences=1)
+        length = length if length > -1 else 0
 
         result = dict()
 
-        for idx, sample_output in enumerate(outputs):
-            result[0] = tokenizer.decode(sample_output.tolist())
+        if length == 0:
+            result[0] = mk_natural_everytime(input_ids)
+        else:
+            length += min_length
+
+            # model generating
+            outputs = model.generate(input_ids, pad_token_id=50256,
+                                     do_sample=True,
+                                     max_length=length,
+                                     min_length=min_length,
+                                     top_k=40,
+                                     num_return_sequences=1)
+
+
+            for idx, sample_output in enumerate(outputs):
+                result[0] = tokenizer.decode(sample_output.tolist())
 
         return result, 200
 
