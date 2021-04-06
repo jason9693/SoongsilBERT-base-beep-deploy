@@ -86,7 +86,7 @@
             document.getElementById('warning').innerText = err;
         }).then(data => {
             const result = document.getElementById('result');
-            result.innerHTML = '&nbsp;&nbsp;' + data[0];
+            result.innerHTML = '&nbsp;&nbsp;' + data[0].replace(/\n/gi, "<br>");
 
             clearInterval(timer);
             time_obj.innerText = 'Done!';
