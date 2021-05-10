@@ -1,7 +1,7 @@
 openapi: 3.0.0   # Open api version
 
 info:
-  title: GPT-2 everytime
+  title: SoongsilBERT-nsmc
   version: "v0.1"
   contact:
     name: AInizer - Lee hoseop

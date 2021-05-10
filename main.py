@@ -1,5 +1,8 @@
 import sentencepiece
-from transformers import GPT2Config, GPT2LMHeadModel
+
+from transformers import RobertaTokenizer, RobertaForSequenceClassification
+import logging
+
 from flask import Flask, request, render_template
 import torch
 from torch.nn import functional as F
@@ -10,42 +13,30 @@ from queue import Queue, Empty
 from threading import Thread
 import time
 
-model_file = "./every_gpt.pt"
-tok_path = "./kogpt2_news_wiki_ko_cased_818bfa919d.spiece"
-kogpt2_config = {
-    "initializer_range": 0.02,
-    "layer_norm_epsilon": 1e-05,
-    "n_ctx": 1024,
-    "n_embd": 768,
-    "n_head": 12,
-    "n_layer": 12,
-    "n_positions": 1024,
-    "vocab_size": 50000,
-    "activation_function": "gelu"
-}
 category_map = {
-    "모두의 연애": "<unused3>",
-    "숭실대 에타": "<unused5>",
-    "대학생 잡담방": "<unused4>"
+    "0": "부정",
+    "1": "긍정",
 }
+
+category_map_logits = {
+    "0": "neg",
+    "1": "pos",
+}
+
 os.system('ls')
 app = Flask(__name__)
 
-# Model & Tokenizer loading
-tokenizer = sentencepiece.SentencePieceProcessor()
-tokenizer.load(tok_path)
-
-model = GPT2LMHeadModel.from_pretrained(pretrained_model_name_or_path=None,
-                                        config=GPT2Config.from_dict(kogpt2_config),
-                                        state_dict=torch.load(model_file))
+tokenizer = RobertaTokenizer.from_pretrained('jason9693/SoongsilBERT-nsmc-base')
+model = RobertaForSequenceClassification.from_pretrained('jason9693/SoongsilBERT-nsmc-base')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
+app.logger.info("Model load finished")
+
 
 requests_queue = Queue()    # request queue.
-BATCH_SIZE = 1              # max request size.
+BATCH_SIZE = 100              # max request size.
 CHECK_INTERVAL = 0.1
-
 
 ##
 # Request handler.
@@ -53,130 +44,58 @@ CHECK_INTERVAL = 0.1
 def handle_requests_by_batch():
     while True:
         request_batch = []
+        text_list = []
 
         while not (len(request_batch) >= BATCH_SIZE):
             try:
-                request_batch.append(requests_queue.get(timeout=CHECK_INTERVAL))
+                request = requests_queue.get(timeout=CHECK_INTERVAL)
+                request_batch.append(request)
             except Empty:
-                continue
+                break
 
-            for requests in request_batch:
-                try:
-                    types = requests['input'].pop(0)
-
-                    if types == 'natural':
-                        requests["output"] = mk_natural_everytime(requests['input'][0], requests['input'][1],
-                                                                  requests['input'][2])
-                    elif types == 'fix-length':
-                        requests["output"] = mk_everytime(requests['input'][0], requests['input'][1],
-                                                          requests['input'][2])
-                except Exception as e:
-                    requests["output"] = e
+        if len(request_batch) == 0:
+           continue
+        # outputs = mk_predict(text_list)
+        valid_requests = []
+        valid_texts = []
+        for idx, request in enumerate(request_batch):
+            types = request["input"][0]
+            txt = request["input"][1]
+            valid_texts.append(txt)
+            valid_requests.append(request)
+        request_batch = []
+            # except Exception as e:
+            #     request["output"] = e
+            #     return
+        
+        outputs = mk_predict(valid_texts)[0]
+        for idx, request in enumerate(valid_requests):
+            try:
+                if request["input"][0] == "logits":
+                    request["output"] = {
+                        "num_req": len(valid_requests),
+                        "result": {
+                            category_map_logits[str(k)]:v for k, v 
+                            in enumerate(outputs[idx].softmax(-1).tolist())}
+                    }
+                else:
+                    request["output"] = str(torch.argmax(outputs[idx], -1).item())
+            except Exception as e:
+                request["output"] = e
+    return
 
 
 handler = Thread(target=handle_requests_by_batch).start()
 
 
 ##
-# top_k_logits
-def top_k_logits(logits, k):
-    if k == 0:
-        return logits
-    values, _ = torch.topk(logits, k)
-    min_values = values[:, -1]
-    return torch.where(logits < min_values, torch.ones_like(logits, dtype=logits.dtype) * -1e10, logits)
-
-
-##
-# top_p_logits
-def top_p_logits(logits, top_p=0.0, filter_value=-float('Inf')):
-    """Nucleus sampling"""
-    if top_p > 0.0:
-        sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-        cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-
-        # Remove tokens with cumulative probability above the threshold
-        sorted_indices_to_remove = cumulative_probs >= top_p
-        # Shift the indices to the right to keep also the first token above the threshold
-        sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-        sorted_indices_to_remove[..., 0] = 0
-
-        indices_to_remove = sorted_indices[sorted_indices_to_remove]
-        logits[:, indices_to_remove] = filter_value
-    return logits
-
-
-##
-# GPT-2 natural generator
-def mk_natural_everytime(text, category, length):
-    try:
-        length = length if length > 0 else 512
-        result = dict()
-
-        ids = tokenizer.encode_as_ids(text)
-        category_id = tokenizer.piece_to_id(category_map[category])
-        ids = [category_id] + ids
-
-        duplicate_count = 0
-        duplicate_threshold = 10
-
-        for i in range(0, length):
-            input_ids = torch.tensor(ids).unsqueeze(0)
-            input_ids = input_ids.to(device)
-            pred = model(input_ids)[0]
-            logits = pred[:, -1, :]
-            # logits = top_p_logits(logits, 0.8)
-            logits = top_k_logits(logits, 10)
-            log_probs = F.softmax(logits, dim=-1)
-            prev = torch.multinomial(log_probs, num_samples=1)
-            gen = prev[0].tolist()
-            if gen[0] == tokenizer.eos_id():
-                break
-            duplicate_count = duplicate_count + 1 if ids[-1] == gen[0] else 0
-            if duplicate_count > duplicate_threshold:
-                break
-            ids += gen
-
-        result[0] = tokenizer.decode_ids(ids[1:]).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
-
-        return result, 200
-
-    except Exception as e:
-        traceback.print_exc()
-        return {'error': e}, 500
-
-
-##
 # GPT-2 generator.
-def mk_everytime(text, category, length):
+def mk_predict(text_array: list):
     try:
-        length = length if length > 0 else 100
+        inputs = tokenizer(text_array, return_tensors="pt")
+        outputs = model(**inputs)[0]
 
-        ids = tokenizer.encode_as_ids(text)
-        category_id = tokenizer.piece_to_id(category_map[category])
-        ids = [category_id] + ids
-
-        result = dict()
-
-        input_ids = torch.tensor(ids).unsqueeze(0)
-        input_ids = input_ids.to(device)
-
-        min_length = len(input_ids.tolist()[0])
-
-        length += min_length
-
-        # model generating
-        outputs = model.generate(input_ids, pad_token_id=50256,
-                                 do_sample=True,
-                                 max_length=length,
-                                 min_length=min_length,
-                                 top_k=40,
-                                 num_return_sequences=1)
-
-        for idx, sample_output in enumerate(outputs):
-            result[0] = tokenizer.decode(sample_output[1:].tolist()).replace('<unused2>', '\n').replace('<unused0>', 'https://...')
-
-        return result, 200
+        return outputs, 200
 
     except Exception as e:
         traceback.print_exc()
@@ -187,7 +106,7 @@ def mk_everytime(text, category, length):
 # Get post request page.
 @app.route('/everytime/<types>', methods=['POST'])
 def generate(types):
-    if types not in ['natural', 'fix-length']:
+    if types not in ['logits', 'class']:
         return {'Error': 'Invalid types'}, 404
 
     # GPU app can process only one request in one time.
@@ -198,13 +117,9 @@ def generate(types):
         args = []
 
         text = request.form['text']
-        category = request.form['category']
-        length = int(request.form['length'])
 
         args.append(types)
         args.append(text)
-        args.append(category)
-        args.append(length)
 
     except Exception as e:
         return {'message': 'Invalid request'}, 500
@@ -246,4 +161,5 @@ def main():
 
 if __name__ == '__main__':
     from waitress import serve
+    app.logger.info("server start")
     serve(app, port=80, host='0.0.0.0')
