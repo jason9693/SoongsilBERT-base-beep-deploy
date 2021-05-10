@@ -40,10 +40,10 @@
         }
 
         let text = document.getElementById("text").value;
-        let category = document.getElementById("category").value;
-        let length = document.getElementById("length").value;
+        // let category = document.getElementById("category").value;
+        // let length = document.getElementById("length").value;
         let types_radio = document.getElementsByName("types");
-        let types = 'natural';
+        let types = 'class';
 
         if (text == '') {
             document.getElementById('warning').innerText = 'Please fill text!';
@@ -62,8 +62,7 @@
         let start = 0;
 
         formData.append('text', text);
-        formData.append('category', category);
-        formData.append('length', length);
+        // formData.append('category', category);
 
         // timer
         timer = setInterval(() => {
@@ -139,7 +138,7 @@
                 <br>
                 <!-- Project title -->
                 <h1>SoongsilBERT-nsmc</h1><br>
-                <a>Generate everytime community style korean text using GPT-2 model.</a><br><br>
+                <a>Classify Sentiment.</a><br><br>
                 <a>Git hub repository : </a> <a href="https://github.com/fpem123/gpt2-everytime" target="_blank">SoongsilBERT-nsmc</a><br>
                 <a>Original Git hub repository : </a><a href="https://github.com/jason9693/UCK-GPT2" target="_blank">jason9693/UCK-GPT2</a><br>
                 <a>Original notebook : </a><a href="https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh" target="_blank">Colab</a><br>
