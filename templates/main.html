@@ -43,7 +43,7 @@
         // let category = document.getElementById("category").value;
         // let length = document.getElementById("length").value;
         let types_radio = document.getElementsByName("types");
-        let types = 'class';
+        let types = 'dpclass';
 
         if (text == '') {
             document.getElementById('warning').innerText = 'Please fill text!';
@@ -58,7 +58,7 @@
         }
 
         const formData = new FormData();
-        const url = `/everytime/${types}`;
+        const url = `/predict/${types}`;
         let start = 0;
 
         formData.append('text', text);
@@ -85,7 +85,7 @@
             document.getElementById('warning').innerText = err;
         }).then(data => {
             const result = document.getElementById('result');
-            result.innerHTML = '&nbsp;&nbsp;' + data[0].replace(/\n/gi, "<br>");
+            result.innerHTML = '&nbsp;&nbsp; 결과 - ' + data[0];
 
             clearInterval(timer);
             time_obj.innerText = 'Done!';
@@ -137,12 +137,10 @@
             <div class="intro">
                 <br>
                 <!-- Project title -->
-                <h1>SoongsilBERT-nsmc</h1><br>
-                <a>Classify Sentiment.</a><br><br>
-                <a>Git hub repository : </a> <a href="https://github.com/fpem123/gpt2-everytime" target="_blank">SoongsilBERT-nsmc</a><br>
-                <a>Original Git hub repository : </a><a href="https://github.com/jason9693/UCK-GPT2" target="_blank">jason9693/UCK-GPT2</a><br>
-                <a>Original notebook : </a><a href="https://colab.research.google.com/drive/1p6DIxsesi3eJNPwFwvMw0MeM5LkSGoPW?usp=sharing&fbclid=IwAR1kejoqnhL738Za3M_BsGnjjJrayGq5AG3hH8UUBX3dRwCK6JvT4loZ88A#scrollTo=fJWeAhLF7rdh" target="_blank">Colab</a><br>
-                <a>Open API : </a> <a href="https://ainize.ai/fpem123/gpt2-everytime?branch=master" target="_blank">On Ainize</a><br><br>
+                <h1>SoongsilBERT-beep</h1><br>
+                <a>Classify Hate Speech.</a><br><br>
+                <a>Git hub repository : </a> <a href="https://github.com/jason9693/SoongsilBERT-base-beep-deploy" target="_blank">SoongsilBERT-beep-deploy</a><br>
+                <a>Original Git hub repository : </a><a href="https://github.com/jason9693/Soongsil-BERT" target="_blank">jason9693/SoongsilBERT</a><br>
             </div>
 
             <hr width="90%">
@@ -150,14 +148,14 @@
             <div class="Info">
                 <h3>Notice</h3>
                 <ul>
-                    <li>SoongsilBERT-nsmc를 테스트 해보는 데모사이트 입니다.</li>
-                    <li>부정/긍정을 확인해 보세요.</li>
+                    <li>SoongsilBERT-beep 테스트 해보는 데모사이트 입니다.</li>
+                    <li>일반/공격성/차별발언 탐지기술을 확인해 보세요.</li>
                 </ul>
 
                 <h3>How to use?</h3>
                 <ul>
                     <li>Text 에 생성의 기초가 될 문장을 입력합니다.</li>
-                    <li>Category 를 선택합니다. 확률로 선택할 시 부정일 확률을, 결과로 보기를 선택할 시 부정/긍정중 하나를 예측합니다. </li>
+                    <li>Category 를 선택합니다. 확률로 선택할 시 각 클래스의 확률값을, 결과로 보기를 선택할 시 일반/공격/차별중 하나를 예측합니다. </li>
                 </ul>
             </div>
 
@@ -208,8 +206,8 @@
                     <option value="class">결과로 보기</option>
                 </select><br> -->
                 <label> Type:
-                    <input type="radio" name="types" value="logits" checked> 확률로 보기
-                    <input type="radio" name="types" value="class"> 결과로 보기
+                    <input type="radio" name="types" value="dplogits" checked> 확률로 보기
+                    <input type="radio" name="types" value="dpclass"> 결과로 보기
                 </label><br>
                 <button class="btn btn-primary btn=lg" type="submit" id="button1" onclick="send_req();">Summit</button><br>
                 <label>Timer:&nbsp;</label><label id="timer">0.0</label><br>

@@ -14,20 +14,22 @@ from threading import Thread
 import time
 
 category_map = {
-    "0": "부정",
-    "1": "긍정",
+    "0": "일반글",
+    "1": "공격발언",
+    "2": "차별발언"
 }
 
 category_map_logits = {
-    "0": "neg",
-    "1": "pos",
+    "0": "Default",
+    "1": "Offensive",
+    "2": "Hate"
 }
 
 os.system('ls')
 app = Flask(__name__)
 
-tokenizer = RobertaTokenizer.from_pretrained('jason9693/SoongsilBERT-nsmc-base')
-model = RobertaForSequenceClassification.from_pretrained('jason9693/SoongsilBERT-nsmc-base')
+tokenizer = RobertaTokenizer.from_pretrained('jason9693/SoongsilBERT-beep-base')
+model = RobertaForSequenceClassification.from_pretrained('jason9693/SoongsilBERT-beep-base')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
@@ -71,15 +73,25 @@ def handle_requests_by_batch():
         outputs = mk_predict(valid_texts)[0]
         for idx, request in enumerate(valid_requests):
             try:
-                if request["input"][0] == "logits":
-                    request["output"] = {
-                        "num_req": len(valid_requests),
-                        "result": {
+                dpstring = []
+                output_item = outputs[idx]
+                if request["input"][0] in ["logits", "dplogits"]:
+                    return_item = {
                             category_map_logits[str(k)]:v for k, v 
-                            in enumerate(outputs[idx].softmax(-1).tolist())}
-                    }
+                            in enumerate(output_item.softmax(-1).tolist())}
                 else:
-                    request["output"] = str(torch.argmax(outputs[idx], -1).item())
+                    return_item = str(torch.argmax(output_item, -1).item())
+                    dpstring = category_map[return_item]
+                if request["input"][0] == "dpclass":
+                    request["output"] = ({0: category_map[return_item]}, 200)
+                elif request["input"][0] == "dplogits":
+                    request["output"] = ({0: ', '.join(
+                        [f"{k}: {v}" for k, v in return_item.items()])}, 200)
+                else:
+                    request["output"] = {
+                        "result": return_item,
+                        "dpstring": dpstring
+                    }
             except Exception as e:
                 request["output"] = e
     return
@@ -104,9 +116,9 @@ def mk_predict(text_array: list):
 
 ##
 # Get post request page.
-@app.route('/everytime/<types>', methods=['POST'])
+@app.route('/predict/<types>', methods=['POST'])
 def generate(types):
-    if types not in ['logits', 'class']:
+    if types not in ['logits', 'class', 'dplogits', 'dpclass']:
         return {'Error': 'Invalid types'}, 404
 
     # GPU app can process only one request in one time.
