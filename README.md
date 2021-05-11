@@ -6,16 +6,30 @@
 
 ### How to use
 
-    
+    curl -X POST "https://master-soongsil-bert-base-beep-deploy-jason9693.endpoint.ainize.ai/predict/logits" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=제정신이냐?"
 
 ### Post parameter
 
-    text: 분류할 게시글
+    text: 분류할 텍스트
 
 
 ### Output format
 
-    {"0": result text}
+    # Logits
+    {
+        "dpstring": [],
+        "result": {
+            "Default": 0.052083078771829605,
+            "Hate": 0.029860498383641243,
+            "Offensive": 0.9180563688278198
+        }
+    }
+    
+    # Class
+    {
+        "dpstring": "공격발언",
+        "result": "1"
+    }
 
 
 ## * With CLI *
@@ -24,7 +38,7 @@
 
 #### Input example
 
-    curl -X POST "#{API_URL}/predict/logits" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=제정신이냐?"
+    curl -X POST "https://master-soongsil-bert-base-beep-deploy-jason9693.endpoint.ainize.ai/predict/logits" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=제정신이냐?"
 
 #### Output example
 
@@ -41,7 +55,7 @@
 
 #### Input example
 
-    curl -X POST "#{API_URL}/predict/class" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=제정신이냐?"
+    curl -X POST "https://master-soongsil-bert-base-beep-deploy-jason9693.endpoint.ainize.ai/predict/class" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "text=제정신이냐?"
 
 #### Output example
 
