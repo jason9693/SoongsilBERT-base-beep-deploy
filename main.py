@@ -168,7 +168,7 @@ def health_check():
 # Main page.
 @app.route('/')
 def main():
-    return render_template('main.html'), 200
+    return render_template('index.html'), 200
 
 
 if __name__ == '__main__':
