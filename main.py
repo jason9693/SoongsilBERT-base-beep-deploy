@@ -85,8 +85,8 @@ def handle_requests_by_batch():
                 if request["input"][0] == "dpclass":
                     request["output"] = ({0: category_map[return_item]}, 200)
                 elif request["input"][0] == "dplogits":
-                    request["output"] = ({0: ', '.join(
-                        [f"{k}: {v}" for k, v in return_item.items()])}, 200)
+                    request["output"] = ({0: '<br>'.join(
+                        [f"{k}: {v:.4f}" for k, v in return_item.items()])}, 200)
                 else:
                     request["output"] = {
                         "result": return_item,
