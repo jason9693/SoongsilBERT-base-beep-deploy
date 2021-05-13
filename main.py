@@ -75,9 +75,13 @@ def handle_requests_by_batch():
             try:
                 dpstring = []
                 output_item = outputs[idx]
-                if request["input"][0] in ["logits", "dplogits"]:
+                if request["input"][0] == "logits":
                     return_item = {
                             category_map_logits[str(k)]:v for k, v 
+                            in enumerate(output_item.softmax(-1).tolist())}
+                elif request["input"][0] == "dplogits":
+                    return_item = {
+                            category_map[str(k)]:v for k, v 
                             in enumerate(output_item.softmax(-1).tolist())}
                 else:
                     return_item = str(torch.argmax(output_item, -1).item())
