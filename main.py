@@ -28,8 +28,8 @@ category_map_logits = {
 os.system('ls')
 app = Flask(__name__)
 
-tokenizer = RobertaTokenizer.from_pretrained('jason9693/SoongsilBERT2-beep-base')
-model = RobertaForSequenceClassification.from_pretrained('jason9693/SoongsilBERT2-beep-base')
+tokenizer = RobertaTokenizer.from_pretrained('jason9693/SoongsilBERT-base-beep')
+model = RobertaForSequenceClassification.from_pretrained('jason9693/SoongsilBERT-base-beep')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
