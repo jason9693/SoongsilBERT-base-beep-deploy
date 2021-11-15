@@ -110,7 +110,7 @@ handler = Thread(target=handle_requests_by_batch).start()
 # GPT-2 generator.
 def mk_predict(text_array: list):
     try:
-        inputs = tokenizer(text_array, return_tensors="pt")
+        inputs = tokenizer(text_array, return_tensors="pt").to(device)
         outputs = model(**inputs)[0]
 
         return outputs, 200
