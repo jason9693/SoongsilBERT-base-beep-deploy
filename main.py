@@ -35,6 +35,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 app.logger.info("Model load finished")
 
+app.logger.info(device)
+
 
 requests_queue = Queue()    # request queue.
 BATCH_SIZE = 100              # max request size.
